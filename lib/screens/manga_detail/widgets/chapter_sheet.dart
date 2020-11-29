@@ -26,6 +26,7 @@ class ChapterSheet extends StatelessWidget {
         child: DefaultTabController(
           length: groups.length,
           child: CustomScrollView(
+            physics: ClampingScrollPhysics(),
             controller: scroller,
             slivers: [
               SliverPersistentHeader(

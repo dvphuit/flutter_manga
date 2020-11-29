@@ -31,7 +31,8 @@ class _Painter extends BoxPainter {
     // final Offset circleOffset = offset + Offset(config.size.width / 2, config.size.height - decoration.size);
     // canvas.drawCircle(circleOffset, decoration.size, paint);
 
-    var rect = Offset(offset.dx + 4, offset.dy +  decoration.padding.vertical + 4) & Size(config.size.width - 8, config.size.height - 8);
+    var rect = Offset(offset.dx + 4, offset.dy + decoration.padding.vertical + 4) &
+        Size(config.size.width - 8, config.size.height - 8);
     canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(99)), paint);
   }
 }
