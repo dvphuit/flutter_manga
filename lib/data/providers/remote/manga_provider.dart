@@ -46,8 +46,15 @@ class MangaProvider extends BaseScrapper implements IMangaData {
 
     manga.genres = doc.querySelectorAll('.list01 a').map((e) => e.text).toList();
 
-    var chapElements = doc.querySelectorAll('.works-chapter-item a');
-    manga.chaps = chapElements.map((e) => Chapter(name: e.text, href: e.attributes['href'])).toList();
+    manga.description = doc.querySelector('.story-detail-info p').text;
+
+    manga.comment = doc.querySelector('.comment-count').text;
+
+    var chapElements = doc.querySelectorAll('.works-chapter-item');
+    manga.chaps = chapElements.map((e) {
+      var chap = e.querySelector('a');
+      return Chapter(name: chap.text.trim(), href: chap.attributes['href'], publishDate: e.children.last.text.trim());
+    }).toList();
     return manga;
   }
 

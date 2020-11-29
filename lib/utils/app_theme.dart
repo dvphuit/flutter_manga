@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const Color primaryColor = Color(0xFF3D3D3D);
+const Color primaryColorDark = Color(0xFF3D3D3D);
+const Color primaryColor = Colors.white;
 const Color accentColor = Color(0xFF3D3D3D);
 const Color unselectedColor = Color(0xFFCCCCCC);
 
@@ -12,10 +13,15 @@ const Color bottomNavDotColor = Colors.redAccent;
 
 class AppTheme {
   AppTheme() {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.light,
-    ));
+    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //   statusBarColor: Colors.transparent,
+    //   statusBarBrightness: Brightness.light,
+    //   systemNavigationBarColor: Colors.black,
+    //   // navigation bar color
+    //   statusBarIconBrightness: Brightness.light,
+    //   // status bar icons' color
+    //   systemNavigationBarIconBrightness: Brightness.dark, //navigation bar icons' color
+    // ));
   }
 
   void showStatusBar() {
@@ -26,22 +32,30 @@ class AppTheme {
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
-  final ThemeData lightTheme = ThemeData(
+  static final ThemeData lightTheme = ThemeData(
+    primaryColor: Colors.white,
+    primaryColorBrightness: Brightness.light,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: Colors.white,
-    backgroundColor: Colors.white,
+    primaryColorDark: Colors.black,
+    canvasColor: Colors.white,
     appBarTheme: AppBarTheme(
-      color: primaryColor,
+      brightness: Brightness.light,
       elevation: 0,
     ),
   );
 
-  final ThemeData darkTheme = ThemeData(
+  static final ThemeData darkTheme = ThemeData(
+    primaryColor: primaryColorDark,
+    primaryColorBrightness: Brightness.dark,
+    primaryColorLight: primaryColorDark,
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: primaryColor,
-    backgroundColor: primaryColor,
+    primaryColorDark: primaryColorDark,
+    indicatorColor: Colors.white,
+    canvasColor: primaryColorDark,
+    backgroundColor: primaryColorDark,
     appBarTheme: AppBarTheme(
-      color: Colors.transparent,
+      color: primaryColorDark,
+      brightness: Brightness.dark,
       elevation: 0,
     ),
   );

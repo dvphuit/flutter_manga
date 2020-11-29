@@ -148,7 +148,7 @@ class _State extends State<SectionList> {
               margin: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
             ),
             Container(
-              margin: EdgeInsets.only(top: 4),
+              margin: EdgeInsets.only(top: 8),
               child: Text(
                 item.name,
                 style: TextStyle(fontSize: 12),

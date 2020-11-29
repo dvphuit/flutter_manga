@@ -18,7 +18,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Manga',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme().darkTheme,
+      themeMode: ThemeMode.light,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: MainPage(),
       initialBinding: MainBinding(),
       getPages: AppPages.pages,

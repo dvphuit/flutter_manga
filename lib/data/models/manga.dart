@@ -1,5 +1,6 @@
 import 'package:flutter_manga/data/models/chapter.dart';
 import 'package:meta/meta.dart';
+import "package:flutter_manga/utils/ext.dart";
 
 class Manga {
   final int id;
@@ -11,8 +12,10 @@ class Manga {
   String views;
   String followed;
   String author;
+  String description;
   String status;
   List<String> genres;
+  String comment;
   List<Chapter> chaps;
 
   Manga({
@@ -28,9 +31,15 @@ class Manga {
     this.author,
     this.status,
     this.genres,
+    this.description,
+    this.comment,
   });
 
   String get lastChapNum => lastChap.split(" ").last;
+  String get shortViews => views.shortenLargeNumber();
+  String get shortFollowed => followed.shortenLargeNumber();
+  String get shortLiked => liked.shortenLargeNumber();
+  String get shortComment => comment.shortenLargeNumber();
 
   @override
   bool operator ==(Object other) {

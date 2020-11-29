@@ -54,7 +54,7 @@ class _SlideState extends State<AutoSlideBanner> {
     return widget.mangas != null ? Stack(
       children: [
         Container(
-          height: 200,
+          height: 180,
           child: _pager(),
         ),
 

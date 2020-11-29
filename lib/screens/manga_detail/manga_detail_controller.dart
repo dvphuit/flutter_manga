@@ -1,16 +1,10 @@
-import 'package:flutter_manga/data/models/chapter.dart';
+import 'package:flutter_manga/data/models/group_chap.dart';
 import 'package:flutter_manga/data/models/manga.dart';
 import 'package:flutter_manga/data/repositories/manga_repo.dart';
 import 'package:flutter_manga/screens/BaseController.dart';
 import "package:flutter_manga/utils/ext.dart";
 import 'package:get/get.dart';
 
-class GroupedChap {
-  final String title;
-  final List<Chapter> chaps;
-
-  GroupedChap({this.title, this.chaps});
-}
 
 class MangaDetailController extends BaseController<MangaRepo> {
   Manga get manga => Get.arguments;
@@ -31,7 +25,6 @@ class MangaDetailController extends BaseController<MangaRepo> {
       var last = entry.last.chapNum.toInt();
       return GroupedChap(title: '$first-$last', chaps: entry);
     }).toList();
-    print(groupedChap);
     update();
   }
 }

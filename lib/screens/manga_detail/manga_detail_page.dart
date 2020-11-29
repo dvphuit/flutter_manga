@@ -1,7 +1,12 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_manga/data/models/group_chap.dart';
 import 'package:flutter_manga/screens/manga_detail/manga_detail_controller.dart';
-import 'package:flutter_manga/utils/app_theme.dart';
+import 'package:flutter_manga/screens/manga_detail/widgets/chapter_sheet.dart';
+import 'package:flutter_manga/screens/widgets/custom_bottom_sheet.dart';
+import 'package:flutter_manga/screens/widgets/expandable_text.dart';
 import 'package:get/get.dart';
 
 class MangaDetailPage extends StatelessWidget {
@@ -11,150 +16,197 @@ class MangaDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MangaDetailController>(builder: (_) {
       return Scaffold(
-        body: Obx((){
-          var chaps = _.isUpdated.value;
-          return DefaultTabController(
-            length: _.groupedChap.length,
-            child: NestedScrollView(
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverAppBar(
-                    backgroundColor: primaryColor,
-                    expandedHeight: 250.0,
-                    floating: true,
-                    pinned: true,
-                    elevation: 0,
-                    title: Text(_.manga.name),
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Container(
-                        margin: EdgeInsets.only(top: 78),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Card(
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              child: CachedNetworkImage(
-                                width: 140,
-                                height: 180,
-                                imageUrl: _.manga.cover,
-                                fit: BoxFit.cover,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              elevation: 10,
-                              margin: EdgeInsets.symmetric(horizontal: 8),
-                            ),
-                            Expanded(
-                              child: Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  Text(_.manga?.author ?? ""),
-                                  Text(_.manga?.status ?? ""),
-                                  _genres(_.manga.genres),
-                                  _stats(_.manga.liked, _.manga.followed, _.manga.views)
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverPersistentHeader(
-                    delegate: _SliverAppBarDelegate(
-                      TabBar(tabs: _.groupedChap.map((e) => Tab(text: e.title)).toList(), isScrollable: true,),
-                    ),
-                    pinned: true,
-                  ),
-                ];
-              },
-              body: Center(
-                child: ListView.builder(itemBuilder: (_, index) => Text('item $index')),
-              ),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_rounded),
+              onPressed: () => Get.back(),
             ),
-          );
-        }),
-      );
+          ),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _cover(_.manga.cover),
+                    _mangaName(_.manga.name),
+                    _author(_.manga.author),
+                    _rating(),
+                    _stats(_.manga.shortLiked, _.manga.shortComment, _.manga.shortViews),
+                    _description(_.manga.description),
+                    _genres(_.manga.genres),
+                    SizedBox(height: context.height * .1)
+                  ],
+                ),
+              ),
+              _chapters(_.groupedChap),
+            ],
+          ));
     });
+  }
+
+  _cover(String url) {
+    return Center(
+      child: Card(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: CachedNetworkImage(
+          width: 140,
+          height: 180,
+          imageUrl: url,
+          fit: BoxFit.cover,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        elevation: 4,
+      ),
+    );
+  }
+
+  _mangaName(String name) {
+    return Center(
+      child: Text(
+        name,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  _author(String author) {
+    return Center(
+      child: Text(
+        author,
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey),
+      ),
+    );
+  }
+
+  _rating() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [true, true, true, true, false]
+          .map((e) => Icon(
+                e ? Icons.star : Icons.star_border,
+                size: 12,
+                color: Colors.orange,
+              ))
+          .toList(),
+    );
+  }
+
+  _description(String description) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 32),
+      child: ExpandableText(
+        description,
+        trimLines: 6,
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: Colors.grey),
+      ),
+    );
+  }
+
+  _chapters(List<GroupedChap> groupedChap) {
+
+
+    return CustomBottomSheet(
+      // builder: (ctx, scroller) => ChapterSheet(
+      //   scroller: scroller,
+      //   groups: groupedChap,
+      // ),
+      builder: (ctx, scroller) => ChapterSheet(
+        scroller: scroller,
+        groups: groupedChap,
+      ),
+    );
   }
 
   _genres(List<String> genres) {
     return genres.isNullOrBlank
         ? Container()
         : Container(
-            margin: EdgeInsets.only(right: 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: genres
-                  .map(
-                    (genre) => Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Text(
-                        genre,
-                        style: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+            margin: EdgeInsets.symmetric(horizontal: 32),
+            child: Center(
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runAlignment: WrapAlignment.center,
+                children: genres
+                    .map(
+                      (genre) => Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text(
+                          genre,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.purple.shade500),
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          color: Colors.grey.withAlpha(40),
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        color: Colors.white,
-                      ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .toList(),
+              ),
             ),
           );
   }
 
   _stats(String liked, String followed, String views) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _statItem(Icons.thumb_up, liked),
-        SizedBox(width: 16),
-        _statItem(Icons.remove_red_eye_sharp, views),
+        _statItem(Icons.remove_red_eye_sharp, Colors.amber, views),
+        SizedBox(width: 12),
+        _statItem(Icons.comment, Colors.purple, followed),
+        SizedBox(width: 12),
+        _statItem(Icons.thumb_up, Colors.redAccent, liked),
       ],
     );
   }
 
-  _statItem(IconData icon, String value) {
-    return Row(
+  _statItem(IconData icon, Color color, String value) {
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
       children: [
-        Icon(
-          icon,
-          size: 14,
+        Container(
+          height: 24,
+          width: 24,
+          child: Icon(
+            icon,
+            size: 12,
+            color: Colors.white,
+          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         Text(
           value ?? '',
-          style: TextStyle(fontSize: 12),
+          style: TextStyle(fontSize: 11, color: Colors.grey),
         )
       ],
     );
   }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
+class CoverClipper extends CustomClipper<Path> {
   @override
-  double get minExtent => _tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => 30;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      child: _tabBar,
-    );
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, size.height * .75);
+    path.cubicTo(0, size.height * .75, size.width * .25, size.height * .5, size.width * .75, size.height * .70);
+    path.cubicTo(
+        size.width * .75, size.height * .70, size.width * .85, size.height * .8, size.width, size.height * .65);
+    path.lineTo(size.width, 0);
+    path.lineTo(0, 0);
+    path.close();
+    return path;
   }
 
   @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return true;
-  }
+  bool shouldReclip(CoverClipper oldClipper) => true;
 }
