@@ -139,7 +139,7 @@ class ChapterSheet extends StatelessWidget {
       children: groups
           .map((e) => ListView.builder(
               itemCount: e.chaps.length,
-              physics: ClampingScrollPhysics(),
+              physics: BouncingScrollPhysics(),
               // controller: scroller,
               itemBuilder: (ctx, index) => Container(
                     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),

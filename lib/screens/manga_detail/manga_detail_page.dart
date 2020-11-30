@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_manga/data/models/group_chap.dart';
 import 'package:flutter_manga/screens/manga_detail/manga_detail_controller.dart';
 import 'package:flutter_manga/screens/manga_detail/widgets/chapter_sheet.dart';
+import 'package:flutter_manga/screens/widgets/SnapSheet.dart';
 import 'package:flutter_manga/screens/widgets/custom_bottom_sheet.dart';
+import 'package:flutter_manga/screens/widgets/cutom_sheet.dart';
 import 'package:flutter_manga/screens/widgets/expandable_text.dart';
 import 'package:get/get.dart';
 
@@ -16,35 +18,40 @@ class MangaDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MangaDetailController>(builder: (_) {
       return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_rounded),
-              onPressed: () => Get.back(),
-            ),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_rounded),
+            onPressed: () => Get.back(),
           ),
-          body: Stack(
-            children: [
-              SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Wrap(
-                  direction: Axis.horizontal,
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    _cover(_.manga.cover),
-                    _mangaName(_.manga.name),
-                    _author(_.manga.author),
-                    _rating(),
-                    _stats(_.manga.shortLiked, _.manga.shortComment, _.manga.shortViews),
-                    _description(_.manga.description),
-                    _genres(_.manga.genres),
-                    SizedBox(height: context.height * .1)
-                  ],
-                ),
-              ),
-              _chapters(_.groupedChap),
-            ],
-          ));
+        ),
+        // body: Stack(
+        //   children: [
+        //     SingleChildScrollView(
+        //       physics: BouncingScrollPhysics(),
+        //       child: Wrap(
+        //         direction: Axis.horizontal,
+        //         spacing: 12,
+        //         runSpacing: 12,
+        //         children: [
+        //           _cover(_.manga.cover),
+        //           _mangaName(_.manga.name),
+        //           _author(_.manga.author),
+        //           _rating(),
+        //           _stats(_.manga.shortLiked, _.manga.shortComment, _.manga.shortViews),
+        //           _description(_.manga.description),
+        //           _genres(_.manga.genres),
+        //           SizedBox(height: context.height * .1)
+        //         ],
+        //       ),
+        //     ),
+        //     // _chapters(_.groupedChap),
+        //   ],
+        // ),
+        body: CustomSheet(
+          child: Container(color: Colors.blue),
+          sheet: Container(color: Colors.red, height: 100),
+        ),
+      );
     });
   }
 
@@ -110,8 +117,6 @@ class MangaDetailPage extends StatelessWidget {
   }
 
   _chapters(List<GroupedChap> groupedChap) {
-
-
     return CustomBottomSheet(
       // builder: (ctx, scroller) => ChapterSheet(
       //   scroller: scroller,
