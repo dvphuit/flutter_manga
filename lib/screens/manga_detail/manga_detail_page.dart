@@ -18,40 +18,48 @@ class MangaDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MangaDetailController>(builder: (_) {
       return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_rounded),
-            onPressed: () => Get.back(),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_rounded),
+              onPressed: () => Get.back(),
+            ),
           ),
-        ),
-        // body: Stack(
-        //   children: [
-        //     SingleChildScrollView(
-        //       physics: BouncingScrollPhysics(),
-        //       child: Wrap(
-        //         direction: Axis.horizontal,
-        //         spacing: 12,
-        //         runSpacing: 12,
-        //         children: [
-        //           _cover(_.manga.cover),
-        //           _mangaName(_.manga.name),
-        //           _author(_.manga.author),
-        //           _rating(),
-        //           _stats(_.manga.shortLiked, _.manga.shortComment, _.manga.shortViews),
-        //           _description(_.manga.description),
-        //           _genres(_.manga.genres),
-        //           SizedBox(height: context.height * .1)
-        //         ],
-        //       ),
-        //     ),
-        //     // _chapters(_.groupedChap),
-        //   ],
-        // ),
-        body: CustomSheet(
-          child: Container(color: Colors.blue),
-          sheet: Container(color: Colors.red, height: 100),
-        ),
-      );
+          // body: Stack(
+          //   children: [
+          //     SingleChildScrollView(
+          //       physics: BouncingScrollPhysics(),
+          //       child: Wrap(
+          //         direction: Axis.horizontal,
+          //         spacing: 12,
+          //         runSpacing: 12,
+          //         children: [
+          //           _cover(_.manga.cover),
+          //           _mangaName(_.manga.name),
+          //           _author(_.manga.author),
+          //           _rating(),
+          //           _stats(_.manga.shortLiked, _.manga.shortComment, _.manga.shortViews),
+          //           _description(_.manga.description),
+          //           _genres(_.manga.genres),
+          //           SizedBox(height: context.height * .1)
+          //         ],
+          //       ),
+          //     ),
+          //     // _chapters(_.groupedChap),
+          //   ],
+          // ),
+          // body: CustomSheet(
+          //   child: Container(color: Colors.blue),
+          //   sheet: Container(color: Colors.red, height: 100),
+          // ),
+          body: SnappingSheet(
+            sheetBelow: SnappingSheetContent(
+              child: Container(
+                color: Colors.red,
+              ),
+              heightBehavior: SnappingSheetHeight.fixed(),),
+            grabbing: Container(
+              color: Colors.blue,
+            ),));
     });
   }
 
@@ -95,11 +103,12 @@ class MangaDetailPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [true, true, true, true, false]
-          .map((e) => Icon(
-                e ? Icons.star : Icons.star_border,
-                size: 12,
-                color: Colors.orange,
-              ))
+          .map((e) =>
+          Icon(
+            e ? Icons.star : Icons.star_border,
+            size: 12,
+            color: Colors.orange,
+          ))
           .toList(),
     );
   }
@@ -122,10 +131,11 @@ class MangaDetailPage extends StatelessWidget {
       //   scroller: scroller,
       //   groups: groupedChap,
       // ),
-      builder: (ctx, scroller) => ChapterSheet(
-        scroller: scroller,
-        groups: groupedChap,
-      ),
+      builder: (ctx, scroller) =>
+          ChapterSheet(
+            scroller: scroller,
+            groups: groupedChap,
+          ),
     );
   }
 
@@ -133,32 +143,33 @@ class MangaDetailPage extends StatelessWidget {
     return genres.isNullOrBlank
         ? Container()
         : Container(
-            margin: EdgeInsets.symmetric(horizontal: 32),
-            child: Center(
-              child: Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                runAlignment: WrapAlignment.center,
-                children: genres
-                    .map(
-                      (genre) => Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text(
-                          genre,
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.purple.shade500),
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                          color: Colors.grey.withAlpha(40),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          );
+      margin: EdgeInsets.symmetric(horizontal: 32),
+      child: Center(
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          runAlignment: WrapAlignment.center,
+          children: genres
+              .map(
+                (genre) =>
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Text(
+                    genre,
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.purple.shade500),
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color: Colors.grey.withAlpha(40),
+                  ),
+                ),
+          )
+              .toList(),
+        ),
+      ),
+    );
   }
 
   _stats(String liked, String followed, String views) {

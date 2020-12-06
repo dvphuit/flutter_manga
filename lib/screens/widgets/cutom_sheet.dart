@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
-import 'package:get/get.dart';
+import 'dart:math';
 
 class CustomSheet extends StatefulWidget {
   final Widget child;
@@ -12,27 +11,31 @@ class CustomSheet extends StatefulWidget {
   State<StatefulWidget> createState() => _SheetState();
 }
 
-class _SheetState extends State<CustomSheet> with SingleTickerProviderStateMixin {
-  var sheetMarginBottom = 0.0;
-  var sheetMinHeight = 100.0;
-  var sheetMaxHeight = 400.0;
-  AnimationController _controller;
+class _SheetState extends State<CustomSheet> with TickerProviderStateMixin {
+  var currentMargin = 0.0;
+  var minMarginBottom = 0.0;
+  var maxMarginBottom = 300.0;
+
+  var posToSnap = 150;
+
+  var headerHeight = 100.0;
+
+  double dragStartValue;
+  Offset dragStartOffset;
+  AnimationController controller;
+  Animation<double> animation;
+  void Function() currentFlingListener;
 
   @override
   void initState() {
-    _controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 1));
-    _controller.addListener(() {
-      setState(() {
-        sheetMarginBottom = _animation.value.toDouble();
-      });
-    });
+    animation = AlwaysStoppedAnimation(0.0);
+    controller = AnimationController(vsync: this);
     super.initState();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -40,86 +43,130 @@ class _SheetState extends State<CustomSheet> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return Stack(
-        children: [
-          Positioned.fill(child: Container(color: Colors.blue)),
-          // Positioned(
-          //   right: 0,
-          //   left: 0,
-          //   bottom: 10,
-          //   child: Container(
-          //     color: Colors.red,
-          //     height: 120,
-          //   ),
-          // ),
-          _bottomSheet2()
-        ],
+        children: [Positioned.fill(child: Container(color: Colors.blue)), _header()],
       );
     });
   }
 
-  _bottomSheet2() {
+  _header() {
     return Positioned(
       right: 0,
       left: 0,
-      bottom: sheetMarginBottom,
-      child: GestureDetector(
-        onVerticalDragEnd: (DragEndDetails details){
-          print('velocity ${details.primaryVelocity}');
-          // _runAnimation();
-          _runAnimation2(details.velocity.pixelsPerSecond, Size(100, context.width));
-        },
-        onVerticalDragUpdate: (DragUpdateDetails detail) => _dragUpdate(detail.primaryDelta),
-        child: Container(
-          color: Colors.red,
-          height: 100,
+      bottom: currentMargin,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (ctx, child) => GestureDetector(
+          onVerticalDragEnd: onDragDone,
+          onVerticalDragUpdate: onDragUpdate,
+          onVerticalDragStart: onDragStart,
+          child: Container(
+            color: Colors.red,
+            height: 100,
+          ),
         ),
       ),
     );
   }
 
-  _dragUpdate(double dy) {
-    sheetMarginBottom -= dy;
-    print(sheetMarginBottom);
-    if (sheetMarginBottom <= 0) {
-      sheetMarginBottom = 0;
-    } else if (sheetMarginBottom >= sheetMaxHeight - sheetMinHeight) {
-      sheetMarginBottom = sheetMaxHeight - sheetMinHeight;
+  void onDragStart(details) {
+    controller.removeListener(currentFlingListener);
+    controller.stop();
+    animation = AlwaysStoppedAnimation(0.0);
+    setState(() {
+      dragStartOffset = details.globalPosition;
+      dragStartValue = currentMargin;
+    });
+  }
+
+  void onDragUpdate(details) {
+    controller.stop();
+    var newValue = dragStartValue - (details.globalPosition - dragStartOffset).dy;
+    // if(newValue <= 0 || newValue >= 300) return;
+
+    setState(() {
+      currentMargin = newValue;
+    });
+  }
+
+  void onDragDone(DragEndDetails details) {
+    setState(() {
+      dragStartOffset = null;
+    });
+
+    double velocity = details.primaryVelocity;
+    if (velocity.abs() == 0) {
+      return;
     }
-    setState(() {});
+
+    controller.duration = Duration(milliseconds: 750);
+
+    currentFlingListener = flingListener(currentMargin);
+
+    animation = Tween(begin: 0.0, end: velocity / 10).animate(
+      CurvedAnimation(
+        curve: Curves.fastLinearToSlowEaseIn,
+        parent: controller,
+      ),
+    )
+      ..addListener(currentFlingListener);
+
+    controller
+      ..reset()
+      ..forward();
   }
 
-  Animation<int> _animation;
 
-  void _runAnimation() {
-    _animation = _controller.drive(
-      IntTween()
-    );
-    _controller.reset();
-    _controller.forward();
+  flingListener(double originalValue) {
+    return () {
+      double newValue = clamp(originalValue - animation.value, minMarginBottom, maxMarginBottom);
+      print('value $newValue');
+
+      if (newValue != currentMargin) {
+        setState(() {
+          currentMargin = newValue;
+        });
+        if(newValue == minMarginBottom || newValue == maxMarginBottom){
+          controller.stop();
+          controller.removeListener(currentFlingListener);
+          return;
+        }
+        // if(newValue >= 220){
+        //   controller.stop();
+        //   controller.removeListener(currentFlingListener);
+        //   _startSnap(maxMarginBottom);
+        //   return;
+        // }
+        // if(newValue <= 70){
+        //   controller.stop();
+        //   controller.removeListener(currentFlingListener);
+        //   _startSnap(minMarginBottom);
+        //   return;
+        // }
+      }
+    };
   }
 
-  void _runAnimation2(Offset pixelsPerSecond, Size size) {
-    _animation = _controller.drive(
-        IntTween(
-          begin: sheetMarginBottom.toInt(),
-          end: sheetMarginBottom.toInt() + 20
-        )
-    );
-    // Calculate the velocity relative to the unit interval, [0,1],
-    // used by the animation controller.
-    final unitsPerSecondX = pixelsPerSecond.dx / size.width;
-    final unitsPerSecondY = pixelsPerSecond.dy / size.height;
-    final unitsPerSecond = Offset(unitsPerSecondX, unitsPerSecondY);
-    final unitVelocity = unitsPerSecond.distance;
+  _startSnap(double marginBottom) {
+    currentFlingListener = _snapListener();
+    controller.duration = Duration(milliseconds: 250);
+    animation = Tween(begin: currentMargin, end: marginBottom).animate(
+      CurvedAnimation(
+        curve: Curves.easeOutExpo,
+        parent: controller,
+      ),
+    )..addListener(_snapListener);
+    controller
+      ..reset()
+      ..forward();
+  }
 
-    const spring = SpringDescription(
-      mass: 30,
-      stiffness: 1,
-      damping: 1,
-    );
-
-    final simulation = SpringSimulation(spring, 0, 1, -unitVelocity);
-
-    _controller.animateWith(simulation);
+  _snapListener(){
+    setState(() {
+      currentMargin = animation.value;
+      print('start snap $currentMargin');
+    });
   }
 }
+
+double clamp<T extends num>(T number, T low, T high) => max(low * 1.0, min(number * 1.0, high * 1.0));
+
